@@ -1,0 +1,22 @@
+{
+  "name": "oci-identity-cli",
+  "version": "1.0.0",
+  "description": "The Oracle Identity Cloud Service REST API enables you to securely manage your resources, including identities and configuration data.",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"test command\""
+  },
+  "keywords": [
+    "cli",
+    "api",
+    "rest",
+    "idcs",
+    "oci",
+    "oracle"
+  ],
+  "author": "Pablo Almaguer (https://github.com/pablodaniel03)",
+  "license": "ISC"
+}

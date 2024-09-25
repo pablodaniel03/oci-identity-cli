@@ -1,0 +1,12 @@
+# MacOs files
+.DS_Store
+._*
+# Visual Studio files
+*.code-workspace
+# NodeJS
+node_modules/
+env/*
+data/*
+
+!env/template.env
+!data/.placeholder
