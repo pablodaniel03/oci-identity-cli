@@ -3,10 +3,14 @@
 ._*
 # Visual Studio files
 *.code-workspace
+.vscode
 # NodeJS
+package-lock.json
 node_modules/
-env/*
-data/*
+.env
 
-!env/template.env
-!data/.placeholder
+# App
+data/*
+src/config/env/*
+!src/config/env/template.env
+!src/config/env/.placeholder
