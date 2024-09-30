@@ -4,6 +4,7 @@ const { identityConfig } = require('../config/config');
 const OAuth2 = require('./oauth2'); // Import the OAuth2 instance to get the access token
 const logger = require('../utils/logger'); // Import the Pino logger
 
+/*
 class Users {
     constructor() {
         this.apiUrl = `${identityConfig.apiBaseUrl}${identityConfig.userEndpoint}`; // Construct the API URL
@@ -116,3 +117,4 @@ class Users {
 }
 
 module.exports = new Users(); // Export an instance of the Users class
+*/
