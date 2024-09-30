@@ -35,12 +35,12 @@ class Users {
     // Method to get a user by ID
     async getUserById(userId) {
         try {
-            const token = OAuth2.getToken(); // Get the access token
+            const token = await OAuth2.getToken(); // Get the access token
             logger.info(`Retrieving user with ID: ${userId}`); // Log retrieval attempt
 
             const response = await axios.get(`${this.apiUrl}/${userId}`, {
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization': `Bearer ${token.access_token}`,
                 },
             });
 
