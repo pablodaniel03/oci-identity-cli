@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 // index.js
 const { program, programName } = require('./src/commands/program'); // Import the shared program
 require('./src/commands/auth'); // Import command modules
