@@ -1,7 +1,7 @@
 // index.js
 const { program, programName } = require('./src/commands/program'); // Import the shared program
 require('./src/commands/auth'); // Import command modules
-require('./src/commands/userSearch'); // Import command modules
+require('./src/commands/users'); // Import command modules
 
 program
     .name(`${programName}`)
