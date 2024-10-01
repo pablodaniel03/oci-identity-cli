@@ -1,13 +1,18 @@
 # MacOs files
 .DS_Store
 ._*
+
 # Visual Studio files
 *.code-workspace
 .vscode
+
 # NodeJS
 package-lock.json
 node_modules/
 .env
+
+# Jest Tests
+coverage/
 
 # App
 data/*
