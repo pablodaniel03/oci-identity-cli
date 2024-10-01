@@ -57,7 +57,7 @@ This command will obtain an access token needed for accessing the Oracle Identit
 
         } catch (error) {
             const errorMessage = error.response?.data || error.message;
-            logger.error('Failed to get access token: %s', errorMessage);
-            console.error('Failed to get access token:', errorMessage);
+            logger.error('Failed to get access token: "%s"', errorMessage);
+            console.error('Failed to get access token: "%s"', errorMessage);
         }
     });
