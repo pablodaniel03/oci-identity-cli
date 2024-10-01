@@ -26,12 +26,6 @@ class OAuth2 {
     }
   }
 
-  // Getter and Setter for envfile
-  getEnvFile() { return this.envfile; }
-  setEnvFile(envfile) { 
-    logger.debug(`OAuth2: setting environment file "${envfile}"`);
-    this.envfile = envfile; 
-  }
   // Getter and Setter for accessToken
   getAccessToken() { return this.accessToken; }
   setAccessToken(token) { this.accessToken = token; }
@@ -52,13 +46,29 @@ class OAuth2 {
                  clientSecret = this.clientSecret,
                  clientScope = this.clientScope) {
     try {
+      // Validate if identityUrl is a valid URL
+      try {
+        new URL(identityUrl);  // This will throw an error if identityUrl is not valid
+      } catch (error) {
+        throw new Error('Invalid Identity URL.');
+      }
+      
       const apiEndpoint = Config.identityApi.tokenEndpoint;
       const tokenApiUrl = identityUrl + apiEndpoint;
+
+      // Check if clientId or clientSecret is missing and throw an error
+      if (!clientId || !clientSecret) {
+        throw new Error('Client ID or Client Secret is missing.');
+      }    
 
       // Create URLSearchParams for form-urlencoded data
       const urlencoded = new URLSearchParams();
       urlencoded.append('grant_type', 'client_credentials');
-      urlencoded.append('scope', clientScope);
+
+      // Append the scope only if it's provided
+      if (clientScope) {
+        urlencoded.append('scope', clientScope);
+      }
 
       logger.debug('OAuth2: [%s] requesting token using clientId: %s', tokenApiUrl, clientId);
       const response = await axios.post(tokenApiUrl, urlencoded.toString(),
@@ -73,6 +83,11 @@ class OAuth2 {
         }
       );
       
+      // Check if the response or response.data is missing and throw an error
+      if(!(response && response.data)) {
+        throw new Error('Invalid token response structure.');
+      }
+
       this.setAccessToken(response.data.access_token);
       this.setTokenType(response.data.token_type);
       this.setExpiresIn(response.data.expires_in);
@@ -81,7 +96,7 @@ class OAuth2 {
       logger.debug('Token obtained successfully: %o',
         JSON.stringify(
           {
-            "accessToken": `${this.getAccessToken().substring(0, 20)}...`,
+            "accessToken": this.getAccessToken() ? `${this.getAccessToken().substring(0, 20)}...` : 'no_access_token',
             "tokenType": this.getTokenType(),
             "expiresIn": this.getExpiresIn()
           }
@@ -89,7 +104,7 @@ class OAuth2 {
 
       return response.data; // Return the token data
     } catch (error) {
-      logger.error('Error obtaining token: %s', error.response?.data || error.message); // Log error details
+      logger.error('Error obtaining token: %s', JSON.stringify(error.response?.data, null, 5) || error.message); // Log error details
       throw error; // Re-throw the error for further handling if needed
     }
   }

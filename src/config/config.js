@@ -3,6 +3,11 @@ const path = require('path');
 const dotenv = require('dotenv');
 const logger = require('../utils/logger');
 
+// Standard error messages with error codes
+const ERROR = {
+  MISSING_ENVFILE: { message: 'No environment file specified or invalid format.', code: 'ERR_MISSING_ENVFILE' },
+  DOTENV_ERROR: { message: 'Error loading environment variables from file:', code: 'ERR_DOTENV_ERROR' }
+};
 
 class Config {
   // List of supported APIs
@@ -16,7 +21,7 @@ class Config {
   };
 
   constructor(envfile) {
-    if (envfile != null) {
+    if (envfile) {
       // Load environment variables from the envfile provided via command-line argument.
       this.loadEnvironment(envfile);
 
@@ -33,18 +38,23 @@ class Config {
 
   // Method to load environment variables
   loadEnvironment(envfile) {
-    // Check if the provided envfile is an absolute path or relative
-    const envFilePath = path.isAbsolute(envfile)
-                        ? envfile
-                        : path.resolve(process.cwd(), envfile); // Use current working directory
-    const envFile = dotenv.config({ path: envFilePath });
+    // Resolve relative paths and check if the provided envfile exists
+    const file = path.isAbsolute(envfile)
+      ? envfile
+      : path.resolve(process.cwd(), envfile); // Use current working directory
 
-    if (envFile.error) {
-      logger.error(`Error loading environment variables from file "${envFilePath}": "${envFile.error}"`);
-      throw envFile.error; // Optionally throw an error to stop execution
+    // Load the environment variables from the specified file
+    const environment = dotenv.config({ path: file });
+
+    // If loading environment variables failed or file does not exist, handle the error
+    if (environment.error) {
+      logger.error(`Error loading environment variables from file "${file}": ${environment.error.message}`);
+      const error = new Error(`${ERROR.DOTENV_ERROR.message} ${file}`);
+      error.code = ERROR.DOTENV_ERROR.code;
+      throw error;
     }
 
-    logger.debug(`Loaded environment variables from file "${envFilePath}"`);
+    logger.debug(`Loaded environment variables from file "${file}"`);
   }
 
   // Method to get the identity configuration
@@ -53,4 +63,4 @@ class Config {
   }
 }
 
-module.exports = Config; // Now export the Config class instead of an instance. So we can provide the envfile.
+module.exports = Config; // Now export the Config class instead of an instance so we can provide the envfile.
