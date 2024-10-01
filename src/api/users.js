@@ -8,7 +8,6 @@ class Users {
     // Load the configuration
     this.config = new Config(envfile);
     this.baseUrl = this.config.getIdentityOAuthConfig().apiBaseUrl;
-
     this.oauth2 = new OAuth2(envfile);
   }
 
@@ -25,10 +24,10 @@ class Users {
   async search(filter) {
     try {
       const token = await this.oauth2.getToken();
-      const defaultUrl = `${this.baseUrl}${Config.identityApi.userEndpoint}`;
-      const apiUrl = filter ? `${defaultUrl}?filter=${filter}` : `${defaultUrl}`;
+      const apiUrl = `${this.baseUrl}${Config.identityApi.userEndpoint}`;
+      const url = filter ? `${apiUrl}?filter=${filter}` : `${apiUrl}`;
       
-      const response = await axios.get(apiUrl,
+      const response = await axios.get(url,
         {
           headers: {
             Authorization: `Bearer ${this.oauth2.getAccessToken()}`,
@@ -48,8 +47,9 @@ class Users {
     try {
       const token = await this.oauth2.getToken();
       const apiUrl = `${this.baseUrl}${Config.identityApi.userEndpoint}`;
+      const url = `${apiUrl}/${userId}`;
 
-      const response = await axios.get(`${apiUrl}/${userId}`, {
+      const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${this.oauth2.getAccessToken()}`,
         },
@@ -62,25 +62,29 @@ class Users {
     }
   }
 
-/*   
-
   // Method to create a new user
-  async createUser(userData) {
+  async createUser(data) {
     try {
-      const response = await axios.post(`${this.apiBaseUrl}${Config.identityApi.userEndpoint}`, userData, {
+      const token = await this.oauth2.getToken();
+      const url = `${this.baseUrl}${Config.identityApi.userEndpoint}`;
+
+      const response = await axios.post(url, data, {
         headers: {
-          Authorization: `Bearer ${this.token}`,
-          'Content-Type': 'application/json',
-        },
+          Authorization: `Bearer ${this.oauth2.getAccessToken()}`,
+          'Content-Type': 'application/json'
+        }
       });
 
-      return response.data; // Return the created user
+      return response.data; // Return the created user data
     } catch (error) {
-      logger.error('Error creating user: %s', error.response?.data || error.message);
+      logger.error('Error fetching user details: %s', JSON.stringify(error.response?.data) || error.message);
       throw error; // Rethrow the error for further handling
     }
   }
 
+
+
+/*   
   // Method to update a user by userId
   async updateUser(userId, userData) {
     try {
