@@ -160,3 +160,38 @@ Examples:
   $ ${programName} user-create -e /path/to/envfile --userName johndoe --firstName John --lastName Doe --email johndoe@example.com
   $ ${programName} user-create -e /path/to/envfile --payload /path/to/user-payload.json
 `);
+
+// Command to delete a user
+program
+  .command('user-delete')
+  .description('Delete a user in Oracle Identity Cloud by userId')
+  .argument('<userId>', 'Identity User Identifier.')
+  .requiredOption('-e, --envfile <envfile>', 'Specify the environment file (required)')
+  .action(async (userId, options) => {
+    try {
+      const { envfile } = options;
+
+      // Initialize Users API with the environment file
+      const usersApi = new Users(envfile);
+
+      // Call the deleteUser method to delete the user by userId
+      const result = await usersApi.deleteUser(userId);
+
+      if(result || result.status == "204"){
+        logger.debug(`User with ID "${userId}" deleted successfully.`);
+        printPrettyJson(JSON.stringify({"status": result.status}));
+      }
+
+      // Log the success message
+      
+    } catch (error) {
+      // Log and print error if user deletion fails
+      logger.error('Failed to delete user: %s', error.message);
+      console.error('Error deleting user:', error.message);
+    }
+  })
+  .addHelpText('after', `
+Examples:
+  $ ${programName} user-delete -e <environment-file> -i <userId>
+`);
+
