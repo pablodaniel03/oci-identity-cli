@@ -20,12 +20,19 @@ class Users {
     this.identityConfig = identityConfig;
   }
 
-  // Method to list users with optional filtering
-  async search(filter) {
+  // Method to search (list) users with optional filtering
+  async search(queryParams = {}) {
     try {
       const token = await this.oauth2.getToken();
       const apiUrl = `${this.baseUrl}${Config.identityApi.userEndpoint}`;
-      const url = filter ? `${apiUrl}?filter=${filter}` : `${apiUrl}`;
+      
+      //const url = filter ? `${apiUrl}?filter=${filter}` : `${apiUrl}`;
+      // Build the query string, excluding empty or undefined values
+      const query = Object.keys(queryParams)
+        .filter(key => queryParams[key] !== undefined && queryParams[key] !== null && queryParams[key] !== '')
+        .map(key => `${key}=${queryParams[key]}`)
+        .join('&');
+      const url = query ? `${apiUrl}?${query}` : apiUrl;
 
       const response = await axios.get(url,
         {

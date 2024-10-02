@@ -8,13 +8,31 @@ program
   .command('user-search')
   .description('Search users or filter users using a SCIM query')
   .requiredOption('-e, --envfile <envfile>', 'Specify the environment file (required)')
-  .option('-f, --filter <filter>', 'Filter users by a SCIM query (optional)')
+  .option('-f, --filter <filter>', 'A filter string that specifies the search criteria for users. (optional)')
+  .option('--attributes <attributes>', 'A comma-delimited string that specifies the names of resource attributes that should be returned in the response. (optional)')
+  .option('--count <number-of-records>', 'An integer that indicates the desired maximum number of query results per page. 1000 is the largest value that you can use. (optional)')
+  .option('--sortBy <sort>', 'A string that indicates the attribute whose value SHALL be used to order the returned responses. The sortBy attribute MUST be in standard attribute notation form. (optional)')
+  .option('--sortOrder <order>', 'A string that indicates the order in which the sortBy parameter is applied. Allowed values are \'ascending\' and \'descending\'. (optional)')
+  .option('--startIndex <index-page>', 'An integer that indicates the 1-based index of the first query result. (optional)')
   .action(async (options) => {
     try {
-      const { envfile, filter } = options;
+      const { envfile, filter, attributes, count, sortBy, sortOrder, startIndex } = options;
+
+      // Build query parameters dynamically, excluding undefined or empty values
+      const queryParams = {
+        filter,
+        attributes,
+        count,
+        sortBy,
+        sortOrder,
+        startIndex
+      };
+
+      // Filter out undefined or empty query parameters
+      const validQueryParams = Object.fromEntries(Object.entries(queryParams).filter(([key, value]) => value !== undefined && value !== ''));
 
       const usersApi = new Users(envfile);
-      const users = await usersApi.search(filter);
+      const users = await usersApi.search(validQueryParams);
 
 
       // Parse and colorize the JSON output
@@ -54,17 +72,29 @@ program
   -----
 
 Examples:
-  $ ${programName} user-search -e <environment-file>
-  $ ${programName} user-search --envfile <environment-file>
 
-  $ ${programName} user-search -e <environment-file> -f <scim-query-filter>
-  $ ${programName} user-search --envfile <environment-file> --filter <scim-query-filter>
+  Basic usage:
+    $ ${programName} user-search -e /path/to/envfile
 
-  $ ${programName} user-search --envfile /path/to/environment-file.env
-  $ ${programName} user-search --envfile /path/to/environment-file.env --filter "userName eq 'johndoe'"
-  $ ${programName} user-search --envfile /path/to/environment-file.env --filter "userName eq 'johndoe'" | jq '.Resources[] | {id: .id, userName: .userName, email: .emails[0].value}'
+  Filter by 'displayName':
+    $ ${programName} user-search --envfile /path/to/envfile --filter "displayName eq 'John'"
 
-  `);
+  Fetch specific attributes:
+    $ ${programName} user-search --envfile /path/to/envfile --attributes "id,displayName"
+
+  Paginate results (limit to 100 results):
+    $ ${programName} user-search --envfile /path/to/envfile --count 100
+
+  Paginate and fetch results starting from the second page:
+    $ ${programName} user-search --envfile /path/to/envfile --count 100 --startIndex 101
+
+  Sort results by 'displayName' in ascending order:
+    $ ${programName} user-search --envfile /path/to/envfile --sortBy displayName --sortOrder ascending
+
+  Combine filter, attributes, and sorting:
+    $ ${programName} user-search --envfile /path/to/envfile --filter "displayName eq 'John'" --attributes "id,displayName" --sortBy displayName --sortOrder ascending --count 100
+
+`);
 
 
 // Command to get user by ID
@@ -78,7 +108,8 @@ program
       const { envfile } = options;
 
       const usersApi = new Users(envfile);
-      const user = await usersApi.getUserById(userId);
+      //const user = await usersApi.getUserById(userId); // TODO: getGroupById is deprecated.
+      const user = await usersApi.search({filter: `id eq "${userId}"`})
 
       // Parse and colorize the JSON output
       printPrettyJson(JSON.stringify(user));
@@ -177,9 +208,9 @@ program
       // Call the deleteUser method to delete the user by userId
       const result = await usersApi.deleteUser(userId);
 
-      if(result || result.status == "204"){
+      if(result || result == '' || result.status == "204"){
         logger.debug(`User with ID "${userId}" deleted successfully.`);
-        printPrettyJson(JSON.stringify({"status": result.status}));
+        printPrettyJson(JSON.stringify({"status": "success"}));
       }
 
       // Log the success message
@@ -187,11 +218,13 @@ program
     } catch (error) {
       // Log and print error if user deletion fails
       logger.error('Failed to delete user: %s', error.message);
-      console.error('Error deleting user:', error.message);
+      console.error(error.response?.data.detail || error.message);
     }
    })
   .addHelpText('after', `
 Examples:
-  $ ${programName} user-delete -e <environment-file> -i <userId>
+  $ ${programName} user-delete <userId> -e <environment-file>
+  $ ${programName} user-delete <userId> --envfile <environment-file>
+
 `);
 
