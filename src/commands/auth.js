@@ -1,7 +1,7 @@
 // src/commands/auth.js
 const { program, programName } = require('./program'); // Import the shared program
+const { printPrettyJson, logger } = require('../utils'); // Import all utils from index.js
 const OAuth2 = require('../api/oauth2');
-const logger = require('../utils/logger');
 
 const name = 'get-token';
 program
@@ -53,7 +53,10 @@ This command will obtain an access token needed for accessing the Oracle Identit
 
             // Successfully received token
             logger.debug('Access Token received successfully.');
-            console.log(JSON.stringify(token));
+            // Parse and colorize the JSON output
+            printPrettyJson(JSON.stringify(token));
+            // console.log(JSON.stringify(users, null, 2));
+            //console.log(JSON.stringify(token));
 
         } catch (error) {
             const errorMessage = error.response?.data || error.message;

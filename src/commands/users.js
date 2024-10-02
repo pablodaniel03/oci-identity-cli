@@ -189,7 +189,7 @@ program
       logger.error('Failed to delete user: %s', error.message);
       console.error('Error deleting user:', error.message);
     }
-  })
+   })
   .addHelpText('after', `
 Examples:
   $ ${programName} user-delete -e <environment-file> -i <userId>
