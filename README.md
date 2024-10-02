@@ -1,39 +1,122 @@
-# Command-Line Interface for Identity Cloud REST API
+# oci-identity: CLI for Identity Cloud REST APIs
 
-This NodeJs application allows you to manage the Identity domain of your OCI through the Command-Line.
-...
+<p align="center">
+  <img alt="Dynamic JSON Badge" src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fpalmaguer%2Foci-identity-cli%2Frefs%2Fheads%2Fdevelop%2Fpackage.json&query=%24.version&logo=nodedotjs&label=version&labelColor=white&color=gray">
+  <img alt="Dynamic JSON Badge" src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fpalmaguer%2Foci-identity-cli%2Frefs%2Fheads%2Fdevelop%2Fpackage.json&query=%24.name&logo=npm&logoColor=red&label=package&labelColor=white&color=gray">
+  <a src="https://github.com/palmaguer/oci-identity-cli/blob/main/LICENSE.md">
+    <img alt="GitHub License" src="https://img.shields.io/github/license/palmaguer/oci-identity-cli?labelColor=white&color=gray">
+  </a>
+  <img alt="GitHub Open Issues" src="https://img.shields.io/github/issues/palmaguer/oci-identity-cli?labelColor=white&color=lightgray">
+  <img alt="GitHub Pull Requests" src="https://img.shields.io/github/issues-pr/palmaguer/oci-identity-cli?labelColor=white&color=lightgray">
+</p>
 
+This Node.js application allows you to manage the Identity domain of your Oracle Cloud Infrastructure (OCI) through the command line.
 > Work in progress
+
+---
+
+## API Documentation
+
+Detailed documentation for the Users and Groups APIs is available in the `docs` folder:
+
+- [Users API Documentation](./docs/UsersAPI.md): Detailed information on managing users, including searching, creating, retrieving, and deleting users.
+- [Groups API Documentation](./docs/GroupsAPI.md): Comprehensive guide for managing groups, including group creation, membership management, and more.
+
+Refer to these files for specific API method usage, SCIM filter examples, and more.
+
+---
+
+## Installation Guide
+
+### Prerequisites:
+- **Node.js** (version 12.x or higher)
+- **npm**
+
+Verify installation:
+```bash
+node -v
+npm -v
+```
+
+### Global Installation:
+
+1. Install from the `main` branch:
+   ```bash
+   npm install -g git+https://github.com/palmaguer/oci-identity-cli.git
+   ```
+2. Install from a specific `Release`:
+   ```bash
+   npm install -g git+https://github.com/palmaguer/oci-identity-cli.git#v1.0.0
+   ```
+
+### Verify Installation:
+
+```bash
+oci-identity --help
+```
+
+### Basic Usage:
+
+- **Authenticate and get a token**:
+  ```bash
+  oci-identity get-token --envfile ./path/to/envfile.env
+  ```
+
+- **Create a new user**:
+  ```bash
+  oci-identity user-create --envfile ./path/to/envfile.env --userName johndoe --firstName John --lastName Doe --email johndoe@example.com
+  ```
+
+- **Search users with filters**:
+  ```bash
+  oci-identity user-search --envfile ./path/to/envfile.env --filter "userName eq 'johndoe'"
+  ```
+
+### Update CLI:
+```bash
+npm install -g git+https://github.com/palmaguer/oci-identity-cli.git#<branch or tag>
+```
+
+---
 
 ## Project Structure
 
 ```lua
-oracle-identity-cli/
+oci-identity-cli/
 │
 ├── src/
 │   ├── api/
 │   │   ├── users.js
 │   │   ├── groups.js
-│   │   ├── auth.js
-│   │   ├── jobSchedules.js
+│   │   ├── oauth2.js
 │   │   └── index.js
 │   │
 │   ├── commands/
-│   │   ├── userCommands.js
-│   │   ├── groupCommands.js
-│   │   ├── authCommands.js
-│   │   ├── jobScheduleCommands.js
-│   │   └── index.js
+│   │   ├── auth.js
+│   │   ├── groups.js
+│   │   ├── program.js
+│   │   └── users.js
 │   │
 │   ├── config/
-│   │   └── config.js
+│   │   ├── config.js
+│   │   └── env/
+│   │       └── template.env
 │   │
 │   ├── utils/
 │   │   ├── logger.js
-│   │   └── requestHandler.js
+│   │   └── jsonUtils.js
 │   │
 │   └── index.js
 │
+├── data/
+│   └── samples/
+│       └── payloads/
+├── docs/
+│   ├── UsersAPI.md
+│   ├── GroupsAPI.md
+│   └── SCIM.md
+├── scripts/
+├── tests/
 ├── .gitignore
 ├── package.json
 ├── README.md
@@ -42,59 +125,35 @@ oracle-identity-cli/
 
 ### Explanation of the Structure
 
-- `src/`: <small>The main source code folder.</small>
-  - `api/`: <small>Contains modules that interact with the Oracle Identity Cloud APIs. Each file corresponds to a specific API group (e.g.,  - users, groups, authentication).</small>
-    - `users.js`: <small>Handles API requests related to users.</small>
-    - `groups.js`: <small>Handles API requests related to groups.</small>
-    - `auth.js`: <small>Handles API requests for authentication (e.g., token generation).</small>
-    - `jobSchedules.js`: <small>Handles API requests related to job scheduling.</small>
-    - `index.js`: <small>Optionally, an index file to export all API modules together for easier import.</small>
-- `commands/`: <small>Contains CLI command logic, possibly using Commander.js and Inquirer.js.</small>
-  - `userCommands.js`: <small>Defines CLI commands for user-related operations.</small>
-  - `groupCommands.js`: <small>Defines CLI commands for group-related operations.</small>
-  - `authCommands.js`: <small>Defines CLI commands for authentication.</small>
-  - `jobScheduleCommands.js`: <small>Defines CLI commands for job scheduling.</small>
-  - `index.js`: <small>Optionally, an index file to combine all CLI commands.</small>
-- `config/`: <small>Configuration files, such as API base URLs, environment variables, etc.</small>
-  - `config.js`: <small>Manages configurations like API endpoints, credentials, and other settings.</small>
-- `utils/`: <small>Utility functions that can be reused across the project.</small>
-  - `logger.js`: <small>Custom logging utility for consistent logging across the application.</small>
-  - `requestHandler.js`: <small>A utility for handling Axios requests, including error handling and response formatting.</small>
-- `index.js`: <small>The entry point of your CLI application. This file can initialize the CLI commands using Commander.js.</small>
-- `.gitignore`: <small>Specifies which files and directories Git should ignore (e.g., node_modules/, .env files).</small>
-- `package.json`: <small>Contains metadata about the project, including dependencies, scripts, and basic information.</small>
-- `README.md`: <small>A markdown file providing an overview of the project, how to install and use it, and any other relevant documentation.</small>
-- `LICENSE`: <small>License information for your project.</small>
-
-
+- **`src/api/`**: Contains modules interacting with Oracle Identity Cloud APIs for users, groups, and authentication.
+- **`src/commands/`**: CLI logic using Commander.js to define commands like `user-create`, `group-create`, etc.
+- **`src/config/`**: Configuration and environment management.
+- **`src/utils/`**: Utility functions (logging, request handling).
+- **`data/`**: Sample payloads for testing.
+- **`docs/`**: Documentation files for the API and SCIM usage.
+- **`tests/`**: Contains test cases for the application.
+  
 ---
 
 ## Identity Cloud REST API
 
-Below the list of the used endpoints:
+### Key Endpoints:
 
-* **Users**
-  `/admin/v1/Users`: <small>Manage user accounts, including retrieving, creating, updating, and deleting users.</small>
+- **Users**: `/admin/v1/Users` — Manage user accounts.
+- **Groups**: `/admin/v1/Groups` — Manage groups and group memberships.
+- **Authentication**: `/oauth2/v1/token` — OAuth2 token retrieval.
 
-* **User Password Management**
-  
-  `/admin/v1/UserPasswordChanger`: <small>Change or reset user passwords. Useful for scenarios like password recovery or administrative password changes.</small>
+### Endpoints Under Development:
 
-* **User Status Management**
-  
-  `/admin/v1/UserStatusChanger`: <small>Change the status of a user (e.g., activate, deactivate). This can be important for managing user access.</small>
+- **User Password Management**: `/admin/v1/UserPasswordChanger` — Change or reset user passwords. Useful for scenarios like password recovery or administrative password changes.
+- **User Status Management**:   `/admin/v1/UserStatusChanger` — Change the status of a user (e.g., activate or deactivate).
+- **Job Scheduling**:           `/job/v1/JobSchedules` — Manage job schedules, such as creating, updating, or monitoring scheduled jobs. This could be used for automating tasks within Oracle Identity Cloud.
+- **Authentication**:           `/oauth2/v1/introspect` — Validate and inspect the details of an access token, ensuring it's still valid and contains the expected scopes.
 
-* **Groups**
-  
-  `/admin/v1/Groups`: <small>Manage groups, including adding/removing users from groups and retrieving group details.</small>
+For detailed information, refer to [Oracle Identity Cloud REST API documentation](https://docs.oracle.com/en/cloud/paas/identity-cloud/rest-api/index.html).
 
-* **Authentication**
-  
-  `/oauth2/v1/token`: <small>Obtain an OAuth2 access token for authenticating subsequent API requests.</small>
-  `/oauth2/v1/introspect`: <small>Validate and inspect the details of an access token, ensuring it's still valid and contains the expected scopes.</small>
+---
 
-* **Job Scheduling**
-  
-  `/job/v1/JobSchedules`: <small>Manage job schedules, such as creating, updating, or monitoring scheduled jobs. This could be used for automating tasks within Oracle Identity Cloud.</small>
+## Troubleshooting
 
-For detailed documentation and a complete list of API endpoints, you can refer to the [Oracle Identity Cloud REST API documentation](https://docs.oracle.com/en/cloud/paas/identity-cloud/rest-api/index.html).
+For further assistance, refer to the `docs/` folder or [open an issue](https://github.com/palmaguer/oci-identity-cli/issues/new/choose).
