@@ -2,6 +2,6 @@
 const { Command } = require('commander');
 const program = new Command();
 
-const programName = 'identity-cli'
+const programName = 'oci-identity'
 
 module.exports = { program, programName };

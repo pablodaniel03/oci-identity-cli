@@ -1,8 +1,11 @@
 {
   "name": "oci-identity-cli",
-  "version": "1.0.0",
-  "description": "Command-Line Inerface for the Oracle Identity Cloud Service REST API.",
+  "version": "0.3.0",
+  "description": "Command-Line Interface for the Oracle Identity Cloud Service REST API.",
   "main": "index.js",
+  "bin": {
+    "oci-identity": "./index.js"
+  },
   "scripts": {
     "debug": "LOG_LEVEL=debug node .",
     "test": "jest"
@@ -17,18 +20,28 @@
   ],
   "author": "Pablo Almaguer (https://github.com/pablodaniel03)",
   "license": "ISC",
+  "type": "commonjs",
   "dependencies": {
     "axios": "^1.7.7",
     "commander": "^12.1.0",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
+    "get-stream": "^9.0.1",
     "inquirer": "^11.0.2",
     "pino": "^9.4.0",
     "pino-pretty": "^11.2.2"
   },
   "devDependencies": {
     "jest": "^29.7.0",
+    "jest-mock-axios": "^4.7.3",
     "jquery": "^3.7.1",
     "jsdom": "^25.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/palmaguer/oci-identity-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/palmaguer/oci-identity-cli/issues"
   }
 }
