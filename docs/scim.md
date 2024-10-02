@@ -10,6 +10,8 @@ SCIM supports filtering using attributes, operators, and values to refine search
 attribute operator value
 ```
 
+---
+
 ### Common SCIM Operators
 
 - **eq**: Equals
@@ -21,6 +23,8 @@ attribute operator value
 - **ge**: Greater than or equal to
 - **le**: Less than or equal to
 - **ne**: Not equal to
+
+---
 
 ### Example Filter Expressions
 
@@ -60,11 +64,15 @@ SCIM allows you to combine multiple filter expressions using logical operators:
 
 This filter retrieves users whose `userName` is `"johndoe"` and who are also active.
 
+---
+
 ### Example SCIM Specification Query with Multiple Conditions:
 
 ```bash
 node index.js user-list --filter "userName eq 'johndoe' and emails.value eq 'johndoe@example.com'" --envfile ./development.env
 ```
+
+---
 
 ### SCIM Resources:
 

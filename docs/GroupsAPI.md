@@ -233,6 +233,8 @@ Here are some example filters that can be used with the **`search`** method:
 - **`displayName co 'Admin'`**: Search for groups whose displayName contains the word "Admin".
 - **`id eq '0123456789'`**: Search for a group by its ID.
 
+> See [*SCIM Specification*](./SCIM.md) for more details.
+
 ---
 
 ## Release Notes:
