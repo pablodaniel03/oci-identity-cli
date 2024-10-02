@@ -40,6 +40,33 @@ program
     }
   })
   .addHelpText('after', `
+  -----
+   SCIM Filter Syntax
+
+     Basic Filter Expression:
+       attribute operator value
+
+     Common Operators:
+       eq : "Equals"
+       co : "Contains (substring match)"
+       sw : "Starts with"
+       pr : "Present (attribute is defined)"
+       gt : "Greater than"
+       lt : "Less than"
+       ge : "Greater than or equal to"
+       le : "Less than or equal to"
+       ne : "Not equal to"
+     
+       - "userName eq 'johndoe'"
+       - "displayName co 'John'"
+       - "active eq true"
+       - "emails.value eq 'johndoe@example.com'"
+       - "meta.lastModified gt '2024-01-01T00:00:00Z'"
+       - "userName eq 'johndoe' and active eq true"
+       
+     Refer to the SCIM specification for detailed information on filtering.
+  -----
+  
 Examples:
 
   Basic usage:
