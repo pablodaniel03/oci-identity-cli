@@ -1,0 +1,22 @@
+{
+  "displayName": "CLI_Developers",
+  "urn:ietf:params:scim:schemas:oracle:idcs:extension:group:Group": {
+    "creationMechanism": "api",
+    "description": "CLI Project Development team."
+  },
+  "members": [
+    {
+      "value": "81bb628d5fb34eaaac1b078b54000a2d",
+      "type": "User"
+    },
+    {
+      "value": "55f77e1b20a8477cb6e7c7142efb71ca",
+      "type": "User"
+    }
+  ],
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:Group",
+    "urn:ietf:params:scim:schemas:oracle:idcs:extension:group:Group",
+    "urn:ietf:params:scim:schemas:extension:custom:2.0:Group"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "displayName": "CLI_Administrator",
+  "urn:ietf:params:scim:schemas:oracle:idcs:extension:group:Group": {
+    "creationMechanism": "api",
+    "description": "CLI Admin Role."
+  },
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:Group",
+    "urn:ietf:params:scim:schemas:oracle:idcs:extension:group:Group",
+    "urn:ietf:params:scim:schemas:extension:custom:2.0:Group"
+  ]
+}

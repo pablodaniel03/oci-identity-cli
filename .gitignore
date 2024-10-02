@@ -1,12 +1,22 @@
 # MacOs files
 .DS_Store
 ._*
+
 # Visual Studio files
 *.code-workspace
-# NodeJS
-node_modules/
-env/*
-data/*
+.vscode
 
-!env/template.env
-!data/.placeholder
+# NodeJS
+package-lock.json
+node_modules/
+.env
+
+# Jest Tests
+coverage/
+
+# App
+data/*
+!data/samples/
+src/config/env/*
+!src/config/env/template.env
+!src/config/env/.placeholder
