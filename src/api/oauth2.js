@@ -22,7 +22,7 @@ class OAuth2 {
       this.clientSecret = oauthConfig.clientSecret;
       this.clientScope = oauthConfig.clientScope;
 
-      logger.debug('OAuth2: environment "%s" loaded. %o', envfile, oauthConfig);
+      logger.debug({clientId: this.clientId, clientScope: this.clientScope}, 'oauth2: client details');
     }
   }
 
@@ -52,13 +52,15 @@ class OAuth2 {
       } catch (error) {
         throw new Error('Invalid Identity URL.');
       }
+      logger.trace("oauth2(getToken): apiBaseUrl is valid.")
       
       const url = `${identityUrl}${Config.identityApi.tokenEndpoint}`;
 
       // Check if clientId or clientSecret is missing and throw an error
       if (!clientId || !clientSecret) {
         throw new Error('Client ID or Client Secret is missing.');
-      }    
+      }
+      logger.trace("oauth2(getToken): client_id and client_secret provided.");
 
       // Create URLSearchParams for form-urlencoded data
       const urlencoded = new URLSearchParams();
@@ -68,8 +70,8 @@ class OAuth2 {
       if (clientScope) {
         urlencoded.append('scope', clientScope);
       }
-
-      logger.debug('OAuth2: requesting token using clientId: %s', clientId);
+      logger.trace("oauth2(getToken): client scope provided.");
+      logger.debug("oauth2(getToken): calling api \"%s\"", url);
       const response = await axios.post(url, urlencoded.toString(),
         {
           auth: {
@@ -95,19 +97,24 @@ class OAuth2 {
       this.setExpiresIn(response.data.expires_in);
       
       // Log the successful token retrieval
-      logger.debug('Token obtained successfully: %o',
-        JSON.stringify(
-          {
-            "accessToken": this.getAccessToken() ? `${this.getAccessToken().substring(0, 20)}...` : 'no_access_token',
-            "tokenType": this.getTokenType(),
-            "expiresIn": this.getExpiresIn()
-          }
-        ), null, 5); 
+      logger.trace(
+        {
+          "accessToken": this.getAccessToken() ? `${this.getAccessToken().substring(0, 20)}...` : 'no_access_token',
+          "tokenType": this.getTokenType(),
+          "expiresIn": this.getExpiresIn()
+        }
+        ,'oauth2(getToken): token obtained successfully');
 
       return response.data; // Return the token data
     } catch (error) {
-      logger.error('Error obtaining token: %s', JSON.stringify(error.response?.data, null, 5) || error.message); // Log error details
-      throw error; // Re-throw the error for further handling if needed
+      const message = {
+        code: error.code, 
+        status: error.response.data.status, 
+        detail: error.response.data.detail
+      };
+
+      logger.error(message, 'oauth2(getToken): error retrieving oauth2 token.');
+      throw message; // Rethrow the error for further handling
     }
   }
 }

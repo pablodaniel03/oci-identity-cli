@@ -11,7 +11,7 @@ program
     .option('-c, --client-id      <clientId>', 'Specify the client ID (required, using arguments).')
     .option('-s, --client-secret  <clientSecret>', 'Specify the client secret (required, using arguments).')
     .option('    --scope          <clientScope>', 'Specify the client scope (optional, using arguments).')
-    .option('-f, --file           <environment-file>', 'Specify a *.env file with yours variables (See README for more details).')
+    .option('-e, --envfile        <environment-file>', 'Specify a *.env file with yours variables (See README for more details).')
     .helpOption('-h, --help', 'Display help for the get-token command.')
     .addHelpText('after', `
 Note: Ensure that the provided environment file is correctly formatted and contains all necessary variables for successful authentication.
@@ -28,14 +28,13 @@ This command will obtain an access token needed for accessing the Oracle Identit
 `)
     .action(async (options) => {
         try {
-            logger.debug(`Starting "${programName} ${name}" command.`);
-            logger.debug('options: %o', options);
+            const { envfile, url, clientId, clientSecret, scope } = options;
 
-            const { file, url, clientId, clientSecret, scope } = options;
+            logger.debug({options}, "get-token: command-line arguments");
 
-            if (!file && (!url || !clientId || !clientSecret)) {
+            if (!envfile && (!url || !clientId || !clientSecret)) {
                 console.log('---------------------');
-                logger.trace('Error: Missing required parameters. Please provide identityUrl, clientId, and clientSecret.');
+                logger.error('get-token: missing required parameters. Please provide identityUrl, clientId, and clientSecret.');
                 console.error(`Missing required parameters. Use "${programName} ${name} --help" for more information.`);
                 console.log('---------------------\n\n');
 
@@ -44,23 +43,16 @@ This command will obtain an access token needed for accessing the Oracle Identit
             }
             
             // Instantiate OAuth2 with the environment file
-            const oauth2 = new OAuth2(file);
-            logger.debug('Initializing OAuth2 with environment file: "%s"', file);
+            const oauth2 = new OAuth2(envfile);
+            logger.trace('get-token: OAuth2 instantiated.');
 
             // Retrieve the access token
-            logger.debug('Requesting access token...');
             const token = await oauth2.getToken(url, clientId, clientSecret, scope);
+            logger.trace('get-token: oauth2 token retrieved.');
 
-            // Successfully received token
-            logger.debug('Access Token received successfully.');
             // Parse and colorize the JSON output
             printPrettyJson(JSON.stringify(token));
-            // console.log(JSON.stringify(users, null, 2));
-            //console.log(JSON.stringify(token));
-
         } catch (error) {
-            const errorMessage = error.response?.data || error.message;
-            logger.error('Failed to get access token: "%s"', errorMessage);
-            console.error('Failed to get access token: "%s"', errorMessage);
+            console.error('Error:', error.detail);
         }
     });
