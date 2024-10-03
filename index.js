@@ -12,6 +12,7 @@ program
     .version('0.3.1', '-v, --version', 'Output the current program version');
 
 
+
 program.parse(process.argv);
 
 // If no command is provided, show help

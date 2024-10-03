@@ -27,6 +27,7 @@ class Users {
       const url = query ? `${apiUrl}?${query}` : apiUrl;
 
       logger.debug("users(search): calling api \"%s\"", url)
+
       const response = await axios.get(url,
         {
           headers: {

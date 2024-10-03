@@ -72,6 +72,7 @@ class OAuth2 {
       }
       logger.trace("oauth2(getToken): client scope provided.");
       logger.debug("oauth2(getToken): calling api \"%s\"", url);
+
       const response = await axios.post(url, urlencoded.toString(),
         {
           auth: {

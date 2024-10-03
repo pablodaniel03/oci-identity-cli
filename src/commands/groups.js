@@ -216,6 +216,7 @@ program
       const membersArray = Array.isArray(members) ? members : members.split(',');
       logger.debug({groupId, options}, "group-add-members: command-line arguments");
 
+
       // Construct the PATCH payload
       const patchData = {
         schemas: ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
