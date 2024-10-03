@@ -22,6 +22,8 @@ class Config {
 
   constructor(envfile) {
     if (envfile) {
+      logger.trace(Config.identityApi, "config: available API list.")
+
       // Load environment variables from the envfile provided via command-line argument.
       this.loadEnvironment(envfile);
 
@@ -32,7 +34,8 @@ class Config {
         clientSecret: process.env.OCI_OAUTH_SECRET,
          clientScope: process.env.OCI_OAUTH_SCOPE
       };
-      logger.debug('Identity Config: %s', JSON.stringify(this.identityConfig));
+
+      logger.trace(this.identityOAuthConfig, 'config: identity configuration');
     }
   }
 
@@ -48,13 +51,13 @@ class Config {
 
     // If loading environment variables failed or file does not exist, handle the error
     if (environment.error) {
-      logger.error(`Error loading environment variables from file "${file}": ${environment.error.message}`);
+      logger.error(environment.error.message, `config(loadEnvironment): error loading environment file "${file}"`);
       const error = new Error(`${ERROR.DOTENV_ERROR.message} ${file}`);
       error.code = ERROR.DOTENV_ERROR.code;
       throw error;
     }
 
-    logger.debug(`Loaded environment variables from file "${file}"`);
+    logger.debug(`config(loadEnvironment): environment file "${file}" loaded.`);
   }
 
   // Method to get the identity configuration

@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { printPrettyJson, logger } = require('../utils'); // Import all utils from index.js
+const { printPrettyJson, handleQuoting, logger } = require('../utils'); // Import all utils from index.js
 const { program, programName } = require('./program'); // Import the shared program
 const Users = require('../api/users');
 
@@ -16,7 +16,11 @@ program
   .option('--startIndex <index-page>', 'An integer that indicates the 1-based index of the first query result. (optional)')
   .action(async (options) => {
     try {
-      const { envfile, filter, attributes, count, sortBy, sortOrder, startIndex } = options;
+      const { envfile, attributes, count, sortBy, sortOrder, startIndex } = options;
+
+      logger.debug({options}, "user-search: command-line arguments");
+      
+      const filter = handleQuoting(options.filter);
 
       // Build query parameters dynamically, excluding undefined or empty values
       const queryParams = {
@@ -27,20 +31,18 @@ program
         sortOrder,
         startIndex
       };
-
+      
       // Filter out undefined or empty query parameters
       const validQueryParams = Object.fromEntries(Object.entries(queryParams).filter(([key, value]) => value !== undefined && value !== ''));
 
+      logger.debug(validQueryParams, "user-search: valid query parameters");
       const usersApi = new Users(envfile);
       const users = await usersApi.search(validQueryParams);
 
-
       // Parse and colorize the JSON output
       printPrettyJson(JSON.stringify(users));
-      // console.log(JSON.stringify(users, null, 2));
     } catch (error) {
-      logger.error('Error listing users: %s', error.message);
-      console.error('Error:', error.message);
+      console.error('Error:', error.detail);
     }
   })
   .addHelpText('after', `
@@ -107,16 +109,16 @@ program
     try {
       const { envfile } = options;
 
+      logger.debug({userId, options}, "user-get: command-line arguments");
+
       const usersApi = new Users(envfile);
-      //const user = await usersApi.getUserById(userId); // TODO: getGroupById is deprecated.
       const user = await usersApi.search({filter: `id eq "${userId}"`})
+      //const user = await usersApi.getUserById(userId); // TODO: getGroupById is deprecated.
 
       // Parse and colorize the JSON output
       printPrettyJson(JSON.stringify(user));
-      // console.log(JSON.stringify(user, null, 2));
     } catch (error) {
-      logger.error('Error fetching user details: %s', error.message);
-      console.error('Error:', error.message);
+      console.error('Error:', error.detail);
     }
   })
   .addHelpText('after', `
@@ -148,11 +150,14 @@ program
       const { envfile, payload, userName, firstName, lastName, email, active } = options;
       let data;
 
+      logger.debug({options}, "user-create: command-line arguments");
+
       if (payload) {
         // Load user details from the payload JSON file
         const fileContent = fs.readFileSync(payload, 'utf-8');
         data = JSON.parse(fileContent);
-        logger.debug('User data loaded from payload file: %s', payload);
+
+        logger.debug("user-create: user data loaded from payload \"%s\"", payload);
       } else {
         // Create user data from command-line arguments
         data = {
@@ -171,6 +176,8 @@ program
           ],
           active: active
         };
+
+        logger.debug(data, "user-create: payload created from command-line arguments");
       }
 
       // Create the user using Users API
@@ -179,10 +186,8 @@ program
 
       // Parse and colorize the JSON output
       printPrettyJson(JSON.stringify(user));
-      // console.log(JSON.stringify(user, null, 2));    
     } catch (error) {
-      logger.error('Error creating user: %s', error.message);
-      console.error('Error creating user:', error.message);
+      console.error('Error:', error.detail);
     }
   })
   .addHelpText('after', `
@@ -202,23 +207,18 @@ program
     try {
       const { envfile } = options;
 
-      // Initialize Users API with the environment file
-      const usersApi = new Users(envfile);
+      logger.debug({options}, "user-delete: command-line arguments");
 
-      // Call the deleteUser method to delete the user by userId
-      const result = await usersApi.deleteUser(userId);
-
-      if(result || result == '' || result.status == "204"){
-        logger.debug(`User with ID "${userId}" deleted successfully.`);
-        printPrettyJson(JSON.stringify({"status": "success"}));
-      }
+      const usersApi = new Users(envfile);               // Initialize Users API with the environment file
+      const result = await usersApi.deleteUser(userId);  // Call the deleteUser method to delete the user by userId
 
       // Log the success message
-      
+      if(result || result == '' || result.status == "204"){
+        logger.debug(`user-delete: user with id("${userId}") deleted successfully.`);
+        printPrettyJson(JSON.stringify({"status": "success"}));
+      }      
     } catch (error) {
-      // Log and print error if user deletion fails
-      logger.error('Failed to delete user: %s', error.message);
-      console.error(error.response?.data.detail || error.message);
+      console.error('Error:', error.detail);
     }
    })
   .addHelpText('after', `
@@ -227,4 +227,3 @@ Examples:
   $ ${programName} user-delete <userId> --envfile <environment-file>
 
 `);
-

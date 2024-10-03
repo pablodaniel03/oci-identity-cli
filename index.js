@@ -9,7 +9,8 @@ require('./src/commands/groups'); // Import command modules
 program
     .name(`${programName}`)
     .description('CLI for interacting with Oracle Identity Cloud Service')
-    .version('1.0.0', '-v, --version', 'Output the current program version');
+    .version('0.3.1', '-v, --version', 'Output the current program version');
+
 
 
 program.parse(process.argv);

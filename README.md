@@ -19,7 +19,8 @@ This Node.js application allows you to manage the Identity domain of your Oracle
 
 Detailed documentation for the Users and Groups APIs is available in the `docs` folder:
 
-- [Users API Documentation](./docs/UsersAPI.md): Detailed information on managing users, including searching, creating, retrieving, and deleting users.
+- [OAuth2 API Documentation](./docs/OAuth2API.md): Comprehensive guide for managing the authentication for APIs.
+- [Users API Documentation](./docs/UsersAPI.md): Comprehensive guide on managing users, including searching, creating, retrieving, and deleting users.
 - [Groups API Documentation](./docs/GroupsAPI.md): Comprehensive guide for managing groups, including group creation, membership management, and more.
 
 Refer to these files for specific API method usage, SCIM filter examples, and more.
