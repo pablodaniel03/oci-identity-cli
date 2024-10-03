@@ -16,7 +16,10 @@ program
   .option('    --startIndex <index-page>', 'An integer that indicates the 1-based index of the first query result.. (optional)')
   .action(async (options) => {
     try {
-      const { envfile, filter, attributes, count, sortBy, sortOrder, startIndex } = options;
+      const { envfile, attributes, count, sortBy, sortOrder, startIndex } = options;
+      logger.debug({options}, "group-search: command-line arguments");
+
+      const filter = handleQuoting(options.filter);
 
       // Build query parameters dynamically, excluding undefined or empty values
       const queryParams = {
@@ -27,16 +30,18 @@ program
         sortOrder,
         startIndex
       };
+
       // Filter out undefined or empty query parameters
       const validQueryParams = Object.fromEntries(Object.entries(queryParams).filter(([key, value]) => value !== undefined && value !== ''));
 
-      const groupsApi = new Groups(envfile); // Instantiate the Groups API class
-      const groups = await groupsApi.search(validQueryParams);
+      logger.debug(validQueryParams, "group-search: valid query parameters");
+      const groupsApi = new Groups(envfile);                    // Instantiate the Groups API class
+      const groups = await groupsApi.search(validQueryParams);  // Call the search method to fetch groups
 
-      printPrettyJson(JSON.stringify(groups)); // Print formatted output
+      // Parse and colorize the JSON output
+      printPrettyJson(JSON.stringify(groups));
     } catch (error) {
-      logger.error('Error searching groups: %s', error.message);
-      console.error('Error:', error.message);
+      console.error('Error:', error.detail);
     }
   })
   .addHelpText('after', `
@@ -100,15 +105,16 @@ program
   .action(async (groupId, options) => {
     try {
       const { envfile } = options;
-      const groupsApi = new Groups(envfile); // Instantiate the Groups API class
-      
-      //const group = await groupsApi.getGroupById(groupId); // TODO: getGroupById is deprecated.
-      const group = await groupsApi.search({filter: `id eq "${groupId}"`})
+      logger.debug({groupId, options}, "group-get: command-line arguments");
 
-      printPrettyJson(JSON.stringify(group)); // Print formatted output
+      const groupsApi = new Groups(envfile);                                // Instantiate the Groups API class
+      const group = await groupsApi.search({filter: `id eq "${groupId}"`})  // Call the search method to fetch the group by groupId
+      //const group = await groupsApi.getGroupById(groupId); // TODO: getGroupById is deprecated.
+
+      // Parse and colorize the JSON output
+      printPrettyJson(JSON.stringify(group));
     } catch (error) {
-      logger.error('Error fetching group details: %s', error.message);
-      console.error('Error:', error.message);
+      console.error('Error:', error.detail);
     }
   })
   .addHelpText('after', `
@@ -130,17 +136,19 @@ program
     try {
       const { envfile, payload, groupName, description, members } = options;
       let data;
+      logger.debug({options}, "group-create: command-line arguments");
 
       // Load group details from the payload file if provided
       if (payload) {
         const fileContent = fs.readFileSync(payload, 'utf-8');
         data = JSON.parse(fileContent);
-        logger.debug('Group data loaded from payload file: %s', payload);
+
+        logger.debug("group-create: group data loaded from payload \"%s\"", payload);
       } else {
         // Create group data from command-line arguments
         data = {
           displayName: groupName,
-          externalId: "123456", // Placeholder for external ID; adjust as needed
+          //externalId: "123456", // Placeholder for external ID; adjust as needed
           schemas: [
             "urn:ietf:params:scim:schemas:core:2.0:Group",
             "urn:ietf:params:scim:schemas:oracle:idcs:extension:group:Group",
@@ -154,13 +162,14 @@ program
 
         // Add members if the --members option is provided
         if (members) {
+          logger.debug("group-create: adding group members from command-line argument");
           let membersArray;
 
           // Check if members is a valid JSON array or a single string
           try {
             membersArray = JSON.parse(members);
             if (!Array.isArray(membersArray)) {
-              throw new Error('Members must be a valid JSON array or a single user ID');
+              throw new Error('group-create: members must be a valid JSON array or a single user ID.');
             }
           } catch (error) {
             // If it's a single user ID, convert it into an array
@@ -173,17 +182,17 @@ program
             type: "User"
           }));
         }
+
+        logger.debug(data, "group-create: payload created from command-line arguments");
       }
 
-      // Create the group using Groups API
-      const groupsApi = new Groups(envfile);
-      const group = await groupsApi.createGroup(data);
+      const groupsApi = new Groups(envfile);            // Instantiate the Groups API class
+      const group = await groupsApi.createGroup(data);  // Call the createGroup method to create a group
 
       // Parse and colorize the JSON output
       printPrettyJson(JSON.stringify(group));
     } catch (error) {
-      logger.error('Error creating group: %s', error.message);
-      console.error('Error creating group:', error.message);
+      console.error('Error:', error.detail);
     }
   })
   .addHelpText('after', `
@@ -205,6 +214,7 @@ program
     try {
       const { envfile, members } = options;
       const membersArray = Array.isArray(members) ? members : members.split(',');
+      logger.debug({groupId, options}, "group-add-members: command-line arguments");
 
       // Construct the PATCH payload
       const patchData = {
@@ -217,15 +227,15 @@ program
           }
         ]
       };
+      logger.debug(patchData, "group-add-members: payload created from command-line arguments");
 
-      const groupsApi = new Groups(envfile); // Instantiate the Groups API class
-      const result = await groupsApi.patchGroup(groupId, patchData);
+      const groupsApi = new Groups(envfile);                         // Instantiate the Groups API class
+      const result = await groupsApi.patchGroup(groupId, patchData); // Call the patchGroup method to add group memebers by groupId and userIds
 
+      // Parse and colorize the JSON output
       printPrettyJson(JSON.stringify(result));
-      logger.info(`Successfully added members to group ${groupId}`);
     } catch (error) {
-      logger.error(`Error adding members to group: ${error.message}`);
-      console.error('Error adding members:', error.message);
+      console.error('Error:', error.detail);
     }
   })
   .addHelpText('after', `
@@ -245,6 +255,7 @@ program
     try {
       const { envfile, members } = options;
       const membersArray = Array.isArray(members) ? members : members.split(',');
+      logger.debug({groupId, options}, "group-remove-members: command-line arguments");
 
       // Construct the PATCH payload
       const patchData = {
@@ -254,15 +265,14 @@ program
           path: `members[value eq "${userId}"]`
         }))
       };
+      logger.debug(patchData, "group-remove-members: payload created from command-line arguments");
 
-      const groupsApi = new Groups(envfile); // Instantiate the Groups API class
-      const result = await groupsApi.patchGroup(groupId, patchData);
+      const groupsApi = new Groups(envfile);                         // Instantiate the Groups API class
+      const result = await groupsApi.patchGroup(groupId, patchData); // Call the patchGroup method to remove group memebers by groupId and userIds
 
       printPrettyJson(JSON.stringify(result));
-      logger.info(`Successfully removed members from group ${groupId}`);
     } catch (error) {
-      logger.error(`Error removing members from group: ${error.message}`);
-      console.error('Error removing members:', error.message);
+      console.error('Error:', error.detail);
     }
   })
   .addHelpText('after', `
@@ -280,17 +290,18 @@ program
   .action(async (groupId, options) => {
     try {
       const { envfile } = options;
+      logger.debug({options}, "group-delete: command-line arguments");
 
-      const groupsApi = new Groups(envfile); // Instantiate the Groups API class
-      const result = await groupsApi.deleteGroup(groupId);
+      const groupsApi = new Groups(envfile);                // Instantiate the Groups API class
+      const result = await groupsApi.deleteGroup(groupId);  // Call the deleteGroup method to delete the group by groupId
 
+      // Log the success message
       if (result == '' || result.status == "204") {
-        logger.debug(`Group with ID "${groupId}" deleted successfully.`);
+        logger.debug(`group-delete: group with id("${groupId}") deleted successfully.`);
         printPrettyJson(JSON.stringify({ "status": "success" }));
       }
     } catch (error) {
-      logger.error('Error deleting group: %s', error.message);
-      console.error('Error:', error.message);
+      console.error('Error:', error.detail);
     }
   })
   .addHelpText('after', `
@@ -298,5 +309,3 @@ Examples:
   $ ${programName} group-delete <groupId> -e /path/to/envfile
   $ ${programName} group-delete "12345" --envfile /path/to/envfile
 `);
-
-module.exports = program;

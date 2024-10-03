@@ -17,14 +17,15 @@ class Groups {
       const token = await this.oauth2.getToken(); // Fetch token
       const apiUrl = `${this.baseUrl}${Config.identityApi.groupEndpoint}`;
 
+      logger.trace("groups(search): oauth2 token obtained");
+
       const query = Object.keys(queryParams)
         .filter(key => queryParams[key] !== undefined && queryParams[key] !== null && queryParams[key] !== '')
         .map(key => `${key}=${queryParams[key]}`)
         .join('&');
-
-      //const url = filter ? `${apiUrl}?filter=${filter}` : apiUrl;
       const url = query ? `${apiUrl}?${query}` : apiUrl;
 
+      logger.debug("groups(search): calling api \"%s\"", url)
       const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${this.oauth2.getAccessToken()}`, // Use token in Authorization header
@@ -33,8 +34,14 @@ class Groups {
 
       return response.data; // Return the list of groups
     } catch (error) {
-      logger.error('Error fetching groups: %s', JSON.stringify(error.response?.data) || error.message);
-      throw error;
+      const message = {
+        code: error.code, 
+        status: error.response.data.status, 
+        detail: error.response.data.detail
+      };
+
+      logger.error(message, 'groups(search): error while searching users');
+      throw message; // Rethrow the error for further handling
     }
   }
 
@@ -64,6 +71,9 @@ class Groups {
       const token = await this.oauth2.getToken(); // Fetch token
       const url = `${this.baseUrl}${Config.identityApi.groupEndpoint}`;
 
+      logger.trace("groups(createGroup): oauth2 token obtained");
+      logger.debug("groups(createGroup): calling api \"%s\"", url);
+
       const response = await axios.post(url, data, {
         headers: {
           Authorization: `Bearer ${this.oauth2.getAccessToken()}`, // Include token in the header
@@ -73,8 +83,14 @@ class Groups {
 
       return response.data; // Return the created group data
     } catch (error) {
-      logger.error('Error creating group: %s', JSON.stringify(error.response?.data) || error.message);
-      throw error;
+      const message = {
+        code: error.code, 
+        status: error.response.data.status, 
+        detail: error.response.data.detail
+      };
+
+      logger.error(message, 'groups(createGroup): error while fetching response group details');
+      throw message; // Rethrow the error for further handling
     }
   }
 
@@ -83,6 +99,9 @@ class Groups {
     try {
       const token = await this.oauth2.getToken(); // Fetch OAuth token
       const apiUrl = `${this.baseUrl}${Config.identityApi.groupEndpoint}/${groupId}`;
+
+      logger.trace("groups(patchGroup): oauth2 token obtained");
+      logger.debug("groups(patchGroup): calling api \"%s\"", url);
 
       // Perform PATCH request with the provided payload
       const response = await axios.patch(apiUrl, payload, {
@@ -106,16 +125,25 @@ class Groups {
       const token = await this.oauth2.getToken(); // Fetch token
       const apiUrl = `${this.baseUrl}${Config.identityApi.groupEndpoint}/${groupId}`;
 
+      logger.trace("groups(deleteGroup): oauth2 token obtained");
+      logger.debug("groups(deleteGroup): calling api \"%s\"", url);
+
       const response = await axios.delete(apiUrl, {
         headers: {
           Authorization: `Bearer ${this.oauth2.getAccessToken()}`, // Include token in the header
         },
       });
 
-      return response.data; // Return deletion confirmation
+      return response; // Return the result of the deletion
     } catch (error) {
-      logger.error('Error deleting group: %s', JSON.stringify(error.response?.data) || error.message);
-      throw error;
+      const message = {
+        code: error.code, 
+        status: error.response.data.status, 
+        detail: error.response.data.detail
+      };
+
+      logger.error(message, 'users(deleteUser): error while deleting user');
+      throw message; // Rethrow the error for further handling
     }
   }
 }
