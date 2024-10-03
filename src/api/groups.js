@@ -26,6 +26,7 @@ class Groups {
       const url = query ? `${apiUrl}?${query}` : apiUrl;
 
       logger.debug("groups(search): calling api \"%s\"", url)
+
       const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${this.oauth2.getAccessToken()}`, // Use token in Authorization header
