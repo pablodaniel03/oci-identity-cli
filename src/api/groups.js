@@ -23,6 +23,7 @@ class Groups {
         .filter(key => queryParams[key] !== undefined && queryParams[key] !== null && queryParams[key] !== '')
         .map(key => `${key}=${queryParams[key]}`)
         .join('&');
+
       const url = query ? `${apiUrl}?${query}` : apiUrl;
 
       logger.debug("groups(search): calling api \"%s\"", url)
