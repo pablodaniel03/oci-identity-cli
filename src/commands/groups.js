@@ -1,6 +1,6 @@
 const fs = require('fs');
 const { program, programName } = require('./program'); // Shared program base
-const { printPrettyJson, logger } = require('../utils'); // Reuse utilities
+const { printPrettyJson, handleQuoting, logger } = require('../utils'); // Import all utils from index.js
 const Groups = require('../api/groups'); // Groups API
 
 // Command to search (list) groups with optional filtering
@@ -17,10 +17,13 @@ program
   .action(async (options) => {
     try {
       const { envfile, attributes, count, sortBy, sortOrder, startIndex } = options;
+      let filter = options.filter;
+
       logger.debug({options}, "group-search: command-line arguments");
 
-      const filter = handleQuoting(options.filter);
-
+      if (filter != null) {
+        filter = handleQuoting(filter);
+      }
       // Build query parameters dynamically, excluding undefined or empty values
       const queryParams = {
         filter,
