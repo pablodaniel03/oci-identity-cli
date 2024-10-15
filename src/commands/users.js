@@ -17,11 +17,13 @@ program
   .action(async (options) => {
     try {
       const { envfile, attributes, count, sortBy, sortOrder, startIndex } = options;
+      let filter = options.filter;
 
       logger.debug({options}, "user-search: command-line arguments");
       
-      const filter = handleQuoting(options.filter);
-
+      if (filter != null) {
+        filter = handleQuoting(filter);
+      }
       // Build query parameters dynamically, excluding undefined or empty values
       const queryParams = {
         filter,
