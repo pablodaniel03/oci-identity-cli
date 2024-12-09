@@ -1,6 +1,6 @@
 {
   "name": "oci-identity-cli",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Command-Line Interface for the Oracle Identity Cloud Service REST API.",
   "main": "index.js",
   "bin": {
