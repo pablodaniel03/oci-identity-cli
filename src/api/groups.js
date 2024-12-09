@@ -99,13 +99,13 @@ class Groups {
   async patchGroup(groupId, payload) {
     try {
       const token = await this.oauth2.getToken(); // Fetch OAuth token
-      const apiUrl = `${this.baseUrl}${Config.identityApi.groupEndpoint}/${groupId}`;
+      const url = `${this.baseUrl}${Config.identityApi.groupEndpoint}/${groupId}`;
 
       logger.trace("groups(patchGroup): oauth2 token obtained");
       logger.debug("groups(patchGroup): calling api \"%s\"", url);
 
       // Perform PATCH request with the provided payload
-      const response = await axios.patch(apiUrl, payload, {
+      const response = await axios.patch(url, payload, {
         headers: {
           Authorization: `Bearer ${this.oauth2.getAccessToken()}`,
           'Content-Type': 'application/scim+json'
@@ -124,12 +124,12 @@ class Groups {
   async deleteGroup(groupId) {
     try {
       const token = await this.oauth2.getToken(); // Fetch token
-      const apiUrl = `${this.baseUrl}${Config.identityApi.groupEndpoint}/${groupId}`;
+      const url = `${this.baseUrl}${Config.identityApi.groupEndpoint}/${groupId}`;
 
       logger.trace("groups(deleteGroup): oauth2 token obtained");
       logger.debug("groups(deleteGroup): calling api \"%s\"", url);
 
-      const response = await axios.delete(apiUrl, {
+      const response = await axios.delete(url, {
         headers: {
           Authorization: `Bearer ${this.oauth2.getAccessToken()}`, // Include token in the header
         },
